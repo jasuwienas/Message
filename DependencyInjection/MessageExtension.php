@@ -6,6 +6,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\Loader;
+use Symfony\Component\HttpKernel\Kernel;
 
 /**
  * This is the class that loads and manages your bundle configuration
@@ -23,18 +24,25 @@ class MessageExtension extends Extension
         $config = $this->processConfiguration($configuration, $configs);
         $parameters = [
             'queue_object_class',
-            'smtp_mailer_user', 'smtp_mailer_sender',
-            'freshmail_api_host', 'freshmail_api_prefix', 'freshmail_api_api_key', 'freshmail_api_secret_key',
-            'sms_api_host', 'sms_api_access_token'
+            'smtp_mailer_user',
+            'smtp_mailer_sender',
+            'freshmail_api_host',
+            'freshmail_api_prefix',
+            'freshmail_api_api_key',
+            'freshmail_api_secret_key',
+            'sms_api_host',
+            'sms_api_access_token',
         ];
-        foreach($parameters as $parameter){
-            if(array_key_exists($parameter, $config)) {
-                $container->setParameter('message.' . $parameter, $config[$parameter]);
-            } else {
-                $container->setParameter('message.' . $parameter, null);
-            }
+        foreach ($parameters as $parameter) {
+            $container->setParameter(
+                'message.'.$parameter,
+                array_key_exists($parameter, $config) ? $config[$parameter] : null
+            );
         }
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
-        $loader->load('services.yml');
+        $symfonyVersion = Kernel::VERSION;
+        $loader->load(
+            (int) $symfonyVersion[0] === 4 ? 'services.yaml' : 'services.yml'
+        );
     }
 }

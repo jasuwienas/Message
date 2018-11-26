@@ -1,0 +1,24 @@
+services:
+    Jasuwienas\MessageBundle\Command\SendMessagesCommand:
+        tags:
+            - { name: 'console.command', command: 'messages:process' }
+    message.queue_manager:
+        class: Jasuwienas\MessageBundle\Service\QueueManagerService
+        public: true
+        arguments: ["@doctrine.orm.entity_manager", "%message.queue_object_class%"]
+    message.queue_manager.process:
+        class: Jasuwienas\MessageBundle\Service\ProcessQueueService
+        public: true
+        arguments: ["@message.queue_manager", "@service_container", "@translator"]
+    message.sender.smtp:
+        class: Jasuwienas\MessageBundle\Service\Senders\SmtpMailSenderService
+        public: true
+        arguments: ["@mailer", '%message.smtp_mailer_user%', '%message.smtp_mailer_sender%']
+    message.sender.freshmail:
+        class: Jasuwienas\MessageBundle\Service\Senders\FreshMailSenderService
+        public: true
+        arguments: ['%message.freshmail_api_host%', '%message.freshmail_api_prefix%', '%message.freshmail_api_api_key%', '%message.freshmail_api_secret_key%']
+    message.sender.sms:
+        class: Jasuwienas\MessageBundle\Service\Senders\SmsSenderService
+        public: true
+        arguments: ['%message.sms_api_host%', '%message.sms_api_access_token%']
